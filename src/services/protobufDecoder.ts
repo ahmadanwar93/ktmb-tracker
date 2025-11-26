@@ -12,7 +12,7 @@ export const initProtobuf = async () => {
     // this is the blueprint that we need to decode protobuf
     // protobuf is a data serialization format (alternative to json and xml)
     // but much smaller message size
-    root = await protobuf.load("/src/services/gtfs-realtime.proto");
+    root = await protobuf.load("/gtfs-realtime.proto");
     // protobuf.load reads the file that specify how to interpret the bytes
     return root;
   } catch (error) {
