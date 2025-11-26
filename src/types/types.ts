@@ -91,3 +91,7 @@ export interface EnrichedVehicle extends VehiclePosition {
 export interface TrainMarkerProps {
   vehicle: EnrichedVehicle;
 }
+export interface AppError {
+  message: string;
+  status?: number;
+}

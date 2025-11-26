@@ -9,9 +9,10 @@ export const fetchKTMBVehicles = async (): Promise<VehiclePosition[]> => {
     const response = await fetch(KTMB_ENDPOINT);
     // fetch works differently than axios. For axios, if status is not 2xx, then it will go to catch block
     // for fetch, catch block is for network error, or manual error thrown in the try block
-
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const error: any = new Error(`HTTP error! status: ${response.status}`);
+      error.status = response.status; // Attach status to error object
+      throw error;
     }
 
     const arrayBuffer = await response.arrayBuffer();
@@ -20,7 +21,6 @@ export const fetchKTMBVehicles = async (): Promise<VehiclePosition[]> => {
 
     // Decode the protobuf
     const decoded = await decodeGTFSRealtime(arrayBuffer);
-    console.log(decoded);
     // restructure the format
     const vehicles: VehiclePosition[] = decoded.entity
       .filter((entity: any) => entity.vehicle && entity.vehicle.position)

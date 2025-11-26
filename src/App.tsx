@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { GTFSStaticData } from "./services/gtfsStaticParser";
 import { fetchKTMBVehicles } from "./services/gtfsApi";
-import type { EnrichedVehicle, VehiclePosition } from "./types/types";
+import type { AppError, EnrichedVehicle, VehiclePosition } from "./types/types";
 import { TrainMap } from "./components/TrainMap";
 import "./App.css";
 
@@ -10,7 +10,7 @@ const gtfsStatic = new GTFSStaticData();
 function App() {
   const [vehicles, setVehicles] = useState<EnrichedVehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<AppError | null>(null);
 
   const enrichVehicles = (
     realtimeVehicles: VehiclePosition[]
@@ -42,8 +42,11 @@ function App() {
         const enriched = enrichVehicles(realtimeVehicles);
         setVehicles(enriched);
         setIsLoading(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+      } catch (err: any) {
+        setError({
+          message: err.message || "Unknown error",
+          status: err.status,
+        });
         setIsLoading(false);
       }
     };
@@ -59,8 +62,12 @@ function App() {
         const realtimeVehicles = await fetchKTMBVehicles();
         const enriched = enrichVehicles(realtimeVehicles);
         setVehicles(enriched);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error updating vehicles:", err);
+        setError({
+          message: err.message || "Unknown error",
+          status: err.status,
+        });
       }
     }, 60000); // 60 seconds
 
@@ -88,9 +95,28 @@ function App() {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-screen flex-col gap-4">
-        <p>Error: {error}</p>
-        <button onClick={() => window.location.reload()}>Retry</button>
+      <div className="flex justify-center items-center min-h-screen flex-col gap-4 bg-gray-900 text-white p-4">
+        {error.status === 429 ? (
+          <>
+            <p className="text-lg sm:text-xl text-center">
+              Error: HTTP error! status: 429
+            </p>
+            <p className="text-gray-400 text-sm sm:text-base max-w-md text-center px-4">
+              The API has rate limited requests. Too many requests were made in
+              a short period. Please wait a few minutes before retrying.
+            </p>
+          </>
+        ) : (
+          <p className="text-lg sm:text-xl text-center px-4">
+            Error: {error.message}
+          </p>
+        )}
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-6 py-2 text-black rounded text-sm sm:text-base"
+        >
+          Retry
+        </button>
       </div>
     );
   }
