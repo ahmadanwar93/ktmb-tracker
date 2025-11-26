@@ -99,7 +99,7 @@ function App() {
     <div className="w-full h-full flex flex-col">
       <header className="h-16 px-10 bg-gray-800 border-b border-gray-700 flex justify-between items-center shadow-md">
         <h1 className="text-2xl font-bold">KTMB Train Tracker</h1>
-        <div className="flex gap-6 text-sm text-gray-500">
+        <div className="hidden md:flex gap-6 text-sm text-gray-500">
           <span>Updates every 60 seconds</span>
         </div>
       </header>
